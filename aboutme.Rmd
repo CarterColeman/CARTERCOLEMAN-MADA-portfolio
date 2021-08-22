@@ -6,7 +6,8 @@ output:
 ---
 
 
-CopyOfProfile pic.JPG
+![](\Data\Github\MADA\CARTERCOLEMAN-MADA-portfolio\57922275845__4D9F21E2-5CFF-4EB8-ADEB-60CA703ECB8B (1).jpg)
+
 
 
 Welcome again the my website! My name is Carter Coleman and I am a PhD student at the University of Georgia, Department of environmental Health Science. This Site serves as an open-source repository for all the data I worked with through my graduate program.
@@ -26,4 +27,4 @@ My coding experience is exclusively in R and comes from taking Population and Co
 From this course, I would like to become proficient enough in R to comfortably analyze my data during my graduate degree. This would mean being comfortable with R syntax, creating and sharing data/markdowns, and learning higher-level statistical methods.
 
 #### Fun Fact
-
+Insert Fun Fact Here.
