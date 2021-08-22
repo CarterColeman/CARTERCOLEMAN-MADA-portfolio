@@ -5,11 +5,16 @@ output:
     toc: FALSE
 ---
 
+
+
 # Hello!
 
-### This Site is here to share data through my graduate degree in Environmental Health Science.
 
-Welcome to **my website** and _data analysis portfolio._ 
+
+### Welcome to **my website** and _data analysis portfolio._
+
+
+This Site is here to share data throughout my graduate degree in Environmental Health Science.
 
 
 * Please use the `Menu Bar` above to look around.

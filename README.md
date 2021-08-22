@@ -1,1 +1,1 @@
-# My website and data analysis portfolio
+# This Site serves as an open-source repository for all the data I worked with through my graduate program.
