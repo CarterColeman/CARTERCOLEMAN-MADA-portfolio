@@ -1,15 +1,12 @@
 ---
-title: "Modern Data Analysis in the Field of Environmentla Health Science"
+title: "Modern Data Analysis in the Field of Environmental Health Science"
 output: 
   html_document:
     toc: FALSE
 ---
 
 
-
 # Hello!
-
-
 
 ### Welcome to **my website** and _data analysis portfolio._
 
