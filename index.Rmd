@@ -1,13 +1,13 @@
 ---
-title: "My website and data analysis portfolio"
+title: "Modern Data Analysis in the Field of Environmentla Health Science"
 output: 
   html_document:
     toc: FALSE
 ---
 
-# Hello
+# Hello!
 
-### And hello again
+### This Site is here to share data through my graduate degree in Environmental Health Science.
 
 Welcome to **my website** and _data analysis portfolio._ 
 
