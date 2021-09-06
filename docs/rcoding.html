@@ -456,8 +456,66 @@ $(document).ready(function () {
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>           <span class="fu">count</span>(year) <span class="sc">%&gt;%</span> </span>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>           <span class="fu">arrange</span>(<span class="sc">-</span>n)</span></code></pre></div>
 <p>#Select data from Y2K</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>Y2K_afticadata <span class="ot">&lt;-</span> africadata <span class="sc">%&gt;%</span></span>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>Y2K_africadata <span class="ot">&lt;-</span> africadata <span class="sc">%&gt;%</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="st">&quot;2000&quot;</span>)</span></code></pre></div>
+<p>#Create new object with the Life expectancy and infant mortality of African Countries for Y2K.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>Y2K_africa_life_infant <span class="ot">&lt;-</span> Y2K_africadata <span class="sc">%&gt;%</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">&quot;country&quot;</span>, <span class="st">&quot;life_expectancy&quot;</span>, <span class="st">&quot;infant_mortality&quot;</span>)</span></code></pre></div>
+<p>#Create new object with the Life expectancy and population of African Countries.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>Y2K_africa_life_pop <span class="ot">&lt;-</span> Y2K_africadata <span class="sc">%&gt;%</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">&quot;country&quot;</span>, <span class="st">&quot;life_expectancy&quot;</span>, <span class="st">&quot;population&quot;</span>)</span></code></pre></div>
+<p>#Plot life expectancy as a function of infant mortality.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> Y2K_africa_life_infant) <span class="sc">+</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(infant_mortality, life_expectancy))</span></code></pre></div>
+<p><img src="rcoding_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>#Plot life expectancy as a function of infant mortality.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> Y2K_africa_life_pop) <span class="sc">+</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="fu">log10</span>(population), life_expectancy))</span></code></pre></div>
+<p><img src="rcoding_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>#Linear Model: Infant Mortality, Life Expectancy for Y2K.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fit_infant_life <span class="ot">&lt;-</span> <span class="fu">lm</span>(life_expectancy<span class="sc">~</span>infant_mortality, <span class="at">data =</span> Y2K_africa_life_infant)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_infant_life)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = life_expectancy ~ infant_mortality, data = Y2K_africa_life_infant)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -22.6651  -3.7087   0.9914   4.0408   8.6817 
+## 
+## Coefficients:
+##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)      71.29331    2.42611  29.386  &lt; 2e-16 ***
+## infant_mortality -0.18916    0.02869  -6.594 2.83e-08 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 6.221 on 49 degrees of freedom
+## Multiple R-squared:  0.4701, Adjusted R-squared:  0.4593 
+## F-statistic: 43.48 on 1 and 49 DF,  p-value: 2.826e-08</code></pre>
+<p>#p-value = 2.826e-08; Based on the p-value, there is a significant correlation between infant mortality and life expectancy. As such, the slope of the relationship is negative, indicating a significant negative relationship between infant mortlaity and life expectancy. As infant mortality increases, life expectancy decreases.</p>
+<p>#Linear Model: population, Life Expectancy for Y2K.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>fit_pop_life <span class="ot">&lt;-</span> <span class="fu">lm</span>(life_expectancy<span class="sc">~</span>population, <span class="at">data =</span> Y2K_africa_life_pop)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_pop_life)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = life_expectancy ~ population, data = Y2K_africa_life_pop)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -18.429  -4.602  -2.568   3.800  18.802 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 5.593e+01  1.468e+00  38.097   &lt;2e-16 ***
+## population  2.756e-08  5.459e-08   0.505    0.616    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 8.524 on 49 degrees of freedom
+## Multiple R-squared:  0.005176,   Adjusted R-squared:  -0.01513 
+## F-statistic: 0.2549 on 1 and 49 DF,  p-value: 0.6159</code></pre>
+<p>#P-value = 0.6159; Based on the p-value, no significant relationship between population size and life expectancy exists.</p>
 
 
 
