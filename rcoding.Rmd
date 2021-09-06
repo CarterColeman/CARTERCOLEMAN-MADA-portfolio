@@ -1,10 +1,123 @@
 ---
 title: "R coding Exercise"
-output: 
+output:
+  word_document:
+    toc: no
   html_document:
-    toc: FALSE
+    toc: no
 ---
 
-This will contain the future R coding exercise.
+#First, load the "dslabs" package (install if needed). Also, load any other packages needed.
+```{r}
+library("dslabs")
+library("tidyverse")
+library(dplyr)
+```
 
+#Look at help file for gapminder data.
+```{r}
+help("gapminder") 
+```
 
+#Overview of data structure.
+```{r}
+str("gapminder")
+```
+
+#Summary of gapminder data.
+```{r}
+summary("gapminder")
+```
+
+#Determine object type of gapminder data.
+```{r}
+class("gapminder")
+```
+
+#Assigns only the African countries to a new object/variable called "africadata".
+```{r}
+africadata <- gapminder %>%
+dplyr::filter(continent == "Africa")
+```
+
+#Check to see if you did it correclty (should have 2907 observations)
+```{r}
+str(africadata)
+summary(africadata)
+```
+#Create new object with the Life expectancy and infant mortality of African Countries.
+```{r}
+africa_life_infant <- africadata %>%
+  select("country", "life_expectancy", "infant_mortality")
+```
+
+#Create new object with the Life expectancy and population of African Countries.
+```{r}
+africa_life_pop <- africadata %>%
+  select("country", "life_expectancy", "population")
+```
+
+#Plot life expectancy as a function of infant mortality.
+```{r}
+ggplot(data = africa_life_infant) + 
+  geom_point(mapping = aes(infant_mortality, life_expectancy))
+```
+
+#Plot life expectancy as a function of infant mortality.
+```{r}
+ggplot(data = africa_life_pop) + 
+  geom_point(mapping = aes(log10(population), life_expectancy))
+```
+
+#Identify missing Data for infant mortality.
+```{r}
+Missing1 <- africadata %>% 
+           select(year,infant_mortality) %>% 
+           filter(is.na(infant_mortality)) %>% 
+           count(year) %>% 
+           arrange(-n)
+```
+
+#Select data from Y2K
+```{r}
+Y2K_africadata <- africadata %>%
+  filter(year == "2000")
+```
+
+#Create new object with the Life expectancy and infant mortality of African Countries for Y2K.
+```{r}
+Y2K_africa_life_infant <- Y2K_africadata %>%
+  select("country", "life_expectancy", "infant_mortality")
+```
+
+#Create new object with the Life expectancy and population of African Countries.
+```{r}
+Y2K_africa_life_pop <- Y2K_africadata %>%
+  select("country", "life_expectancy", "population")
+```
+
+#Plot life expectancy as a function of infant mortality.
+```{r}
+ggplot(data = Y2K_africa_life_infant) + 
+  geom_point(mapping = aes(infant_mortality, life_expectancy))
+```
+
+#Plot life expectancy as a function of infant mortality.
+```{r}
+ggplot(data = Y2K_africa_life_pop) + 
+  geom_point(mapping = aes(log10(population), life_expectancy))
+```
+
+#Linear Model: Infant Mortality, Life Expectancy for Y2K.
+```{r}
+fit_infant_life <- lm(life_expectancy~infant_mortality, data = Y2K_africa_life_infant)
+summary(fit_infant_life)
+```
+#p-value = 2.826e-08; Based on the p-value, there is a significant correlation between infant mortality and life expectancy. As such, the slope of the relationship is negative, indicating a significant negative relationship between infant mortlaity and life expectancy. As infant mortality increases, life expectancy decreases.
+
+#Linear Model: population, Life Expectancy for Y2K.
+```{r}
+fit_pop_life <- lm(life_expectancy~population, data = Y2K_africa_life_pop)
+summary(fit_pop_life)
+```
+#P-value = 0.6159; Based on the p-value, no significant relationship between population size and life expectancy exists.
