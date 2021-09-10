@@ -373,7 +373,7 @@ $(document).ready(function () {
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;tidyverse&quot;</span>)</span></code></pre></div>
 <pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
 <pre><code>## v ggplot2 3.3.5     v purrr   0.3.4
-## v tibble  3.1.3     v dplyr   1.0.7
+## v tibble  3.1.4     v dplyr   1.0.7
 ## v tidyr   1.1.3     v stringr 1.4.0
 ## v readr   2.0.1     v forcats 0.5.1</code></pre>
 <pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
@@ -516,6 +516,68 @@ $(document).ready(function () {
 ## Multiple R-squared:  0.005176,   Adjusted R-squared:  -0.01513 
 ## F-statistic: 0.2549 on 1 and 49 DF,  p-value: 0.6159</code></pre>
 <p>#P-value = 0.6159; Based on the p-value, no significant relationship between population size and life expectancy exists.</p>
+<div id="section" class="section level31">
+<p class="heading"></p>
+<p>2021.09.09: Additions by MYC</p>
+<p>install broom</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span></code></pre></div>
+<p>#Attempt to print lm outputs into table (populations and life expectancy)</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">tidy</span>(fit_pop_life))</span></code></pre></div>
+<pre><code>## # A tibble: 2 x 5
+##   term             estimate    std.error statistic  p.value
+##   &lt;chr&gt;               &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept) 55.9          1.47            38.1   4.51e-38
+## 2 population   0.0000000276 0.0000000546     0.505 6.16e- 1</code></pre>
+<p>#Attempt to print lm outputs into table (infant mortality and life expectancy)</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">tidy</span>(fit_infant_life))</span></code></pre></div>
+<pre><code>## # A tibble: 2 x 5
+##   term             estimate std.error statistic  p.value
+##   &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)        71.3      2.43       29.4  8.91e-33
+## 2 infant_mortality   -0.189    0.0287     -6.59 2.83e- 8</code></pre>
+<p>#Population of Africa to Life Expectancy in 2000</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>Y2K_africa_life_pop<span class="sc">%&gt;%</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(life_expectancy, population))<span class="sc">+</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>()<span class="sc">+</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color=</span><span class="st">&quot;blue&quot;</span>)<span class="sc">+</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se=</span><span class="cn">TRUE</span>, <span class="at">fill=</span><span class="st">&quot;orange&quot;</span>, <span class="at">color=</span><span class="st">&quot;red&quot;</span>)<span class="sc">+</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="co">#  stat_smooth(fill=&quot;orange&quot;, color=&quot;orange&quot;)+</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Life Expectancy in Years&quot;</span>, <span class="at">y=</span><span class="st">&quot;Population (Log10)&quot;</span>, <span class="at">title =</span> <span class="st">&quot;Population of Africa to Life Expectancy in 2000&quot;</span>, <span class="at">caption =</span> <span class="st">&quot;P-value &gt; 0.05; Based on the p-value, no significant relationship between population size and life expectancy exists. </span><span class="sc">\n</span><span class="st"> Red line indicates regression line and orange is the variance.&quot;</span>)</span></code></pre></div>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="rcoding_files/figure-html/unnamed-chunk-23-1.png" width="672" /> #Infant mortality to life expectancy of Africa in 2000</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>Y2K_africa_life_infant<span class="sc">%&gt;%</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(life_expectancy, infant_mortality))<span class="sc">+</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color=</span><span class="st">&quot;blue&quot;</span>)<span class="sc">+</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se=</span><span class="cn">TRUE</span>, <span class="at">fill=</span><span class="st">&quot;orange&quot;</span>, <span class="at">color=</span><span class="st">&quot;red&quot;</span>)<span class="sc">+</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Infant deaths per 1000&quot;</span>, <span class="at">y=</span><span class="st">&quot;Life Expectancy in Years&quot;</span>, <span class="at">title =</span> <span class="st">&quot;Infant mortality to life expectancy of Africa in 2000&quot;</span>, <span class="at">caption =</span> <span class="st">&quot;P-value &lt; 0.05; there is a significant correlation between infant mortality and life expectancy.</span><span class="sc">\n</span><span class="st"> Red line indicates regression line and orange is the variance.&quot;</span>)</span></code></pre></div>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="rcoding_files/figure-html/unnamed-chunk-24-1.png" width="672" /> #Infant Mortality by region</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>Y2K_africadata<span class="sc">%&gt;%</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(life_expectancy, infant_mortality))<span class="sc">+</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color=</span><span class="st">&quot;blue&quot;</span>)<span class="sc">+</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se=</span><span class="cn">TRUE</span>, <span class="at">fill=</span><span class="st">&quot;orange&quot;</span>, <span class="at">color=</span><span class="st">&quot;red&quot;</span>)<span class="sc">+</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(.<span class="sc">~</span>region)<span class="sc">+</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Infant deaths per 1000&quot;</span>, <span class="at">y=</span><span class="st">&quot;Life Expectancy in Years&quot;</span>, <span class="at">title =</span> <span class="st">&quot;Infant mortality to life expectancy of African regions in 2000&quot;</span>)</span></code></pre></div>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="rcoding_files/figure-html/unnamed-chunk-25-1.png" width="672" /> Batch Tidy linear regression by African regions in 2000</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>Y2K_africadata<span class="sc">%&gt;%</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(region)<span class="sc">%&gt;%</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do</span>(<span class="fu">tidy</span>(<span class="fu">lm</span>(life_expectancy<span class="sc">~</span>infant_mortality,.)))</span></code></pre></div>
+<pre><code>## # A tibble: 10 x 6
+## # Groups:   region [5]
+##    region          term             estimate std.error statistic  p.value
+##    &lt;fct&gt;           &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+##  1 Eastern Africa  (Intercept)       69.6       5.17      13.5   2.12e- 9
+##  2 Eastern Africa  infant_mortality  -0.210     0.0637    -3.29  5.37e- 3
+##  3 Middle Africa   (Intercept)       63.7       5.25      12.1   1.90e- 5
+##  4 Middle Africa   infant_mortality  -0.111     0.0523    -2.13  7.77e- 2
+##  5 Northern Africa (Intercept)       82.3       1.50      54.8   6.65e- 7
+##  6 Northern Africa infant_mortality  -0.290     0.0365    -7.94  1.36e- 3
+##  7 Southern Africa (Intercept)       57.2       7.20       7.95  4.15e- 3
+##  8 Southern Africa infant_mortality  -0.0884    0.108     -0.819 4.73e- 1
+##  9 Western Africa  (Intercept)       70.9       2.37      29.9   4.32e-14
+## 10 Western Africa  infant_mortality  -0.153     0.0248    -6.19  2.34e- 5</code></pre>
+</div>
 
 
 
