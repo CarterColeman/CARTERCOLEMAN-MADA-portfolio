@@ -368,10 +368,18 @@ $(document).ready(function () {
 </div>
 
 
-<p>#Welcome to my visualization exercise! Below is my attepmt at recreating a plot from FiveThirtyEight. My starting data was only their .csv file that they iused for the plot on their site describing Congressional resignations over time. The firgure itself was made using RStudio packages…. and some sweat and tears. See below for the original figure.</p>
-<p><a href="https://fivethirtyeight.com/wp-content/uploads/2018/01/rakich-resignations-11.png?w=2048">FiveThirtyEight</a></p>
-<p>#Here is where I start my figure production.</p>
-<p>#Load important packages:</p>
+<div id="welcome-to-my-visualization-exercise-below-is-my-attepmt-at-recreating-a-plot-from-fivethirtyeight.-my-starting-data-was-only-their-.csv-file-that-they-iused-for-the-plot-on-their-site-describing-congressional-resignations-over-time.-the-firgure-itself-was-made-using-rstudio-packages.-and-some-sweat-and-tears.-see-below-for-the-original-figure." class="section level3">
+<h3>Welcome to my visualization exercise! Below is my attepmt at recreating a plot from FiveThirtyEight. My starting data was only their .csv file that they iused for the plot on their site describing Congressional resignations over time. The firgure itself was made using RStudio packages…. and some sweat and tears. See below for the original figure.</h3>
+<div class="figure">
+<img src="data/Module5_data/congress-resignations/rakich-resignations-11.png" alt="" />
+<p class="caption">Image from FiveThirtyEight</p>
+</div>
+<p></br></p>
+</div>
+<div id="here-is-where-i-start-my-figure-production." class="section level3">
+<h3>Here is where I start my figure production.</h3>
+<p></br></p>
+<p>Load important packages:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
 <pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
 <pre><code>## v ggplot2 3.3.5     v purrr   0.3.4
@@ -386,16 +394,16 @@ $(document).ready(function () {
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span></code></pre></div>
 <pre><code>## here() starts at C:/Data/Github/MADA/CARTERCOLEMAN-MADA-portfolio</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span></code></pre></div>
-<p>#Set up a custom color pallete for later use.</p>
+<p>Set up a custom color pallete for later use.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Five_Thirty_Eight <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Other office&quot;</span> <span class="ot">=</span> <span class="st">&quot;#F5B901&quot;</span>, <span class="st">&quot;Election overturned&quot;</span> <span class="ot">=</span> <span class="st">&quot;#222222&quot;</span>, <span class="st">&quot;Private sector&quot;</span> <span class="ot">=</span> <span class="st">&quot;#018FD5&quot;</span>, <span class="st">&quot;Health/Family&quot;</span> <span class="ot">=</span> <span class="st">&quot;#43AB43&quot;</span>, <span class="st">&quot;Left early&quot;</span> <span class="ot">=</span> <span class="st">&quot;#AE66AB&quot;</span>, <span class="st">&quot;Military service&quot;</span> <span class="ot">=</span> <span class="st">&quot;#A4522E&quot;</span>, <span class="st">&quot;Unwanted sexual conduct&quot;</span> <span class="ot">=</span> <span class="st">&quot;#FF2700&quot;</span>, <span class="st">&quot;Consentual sex scandals&quot;</span> <span class="ot">=</span> <span class="st">&quot;#FF9F02&quot;</span>, <span class="st">&quot;Other scandals&quot;</span> <span class="ot">=</span> <span class="st">&quot;#FFE3D7&quot;</span>, <span class="st">&quot;Other&quot;</span> <span class="ot">=</span> <span class="st">&quot;#CDCDCD&quot;</span>)</span></code></pre></div>
-<p>#upload data set.</p>
+<p>Upload data set.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>data_location <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;Module5_data&quot;</span>,<span class="st">&quot;congress-resignations&quot;</span>,<span class="st">&quot;congressional_resignations.xlsx&quot;</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>rawdata <span class="ot">&lt;-</span> readxl<span class="sc">::</span><span class="fu">read_excel</span>(data_location)</span></code></pre></div>
-<p>#Select variables “Congress” and “Category”.</p>
+<p>Select variables “Congress” and “Category”.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>CongressRes1 <span class="ot">&lt;-</span> rawdata <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">&quot;Congress&quot;</span>, <span class="st">&quot;Category&quot;</span>)</span></code></pre></div>
-<p>#Split values of 2 or more categories using string split.</p>
+<p>Split values of 2 or more categories using string split.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Test <span class="ot">&lt;-</span> <span class="fu">separate</span>(CongressRes1, <span class="st">&quot;Category&quot;</span>, <span class="fu">paste</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">sep =</span> <span class="st">&quot;&amp;&quot;</span>))</span></code></pre></div>
 <pre><code>## Warning: Expected 2 pieces. Missing pieces filled with `NA` in 598 rows [1, 2,
 ## 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, ...].</code></pre>
@@ -405,7 +413,7 @@ $(document).ready(function () {
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>Stack<span class="sc">$</span>value <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co">#Add varibable that assigns a value of 1 to each letter.</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>Stack <span class="ot">&lt;-</span> Stack[<span class="sc">!</span><span class="fu">is.na</span>(Stack<span class="sc">$</span>Category), ]</span></code></pre></div>
-<p>#Create new Category row.</p>
+<p>Create new Category row.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>Stack <span class="ot">&lt;-</span> Stack <span class="sc">%&gt;%</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Category =</span> <span class="fu">case_when</span>(</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  Category <span class="sc">==</span> <span class="st">&quot;C&quot;</span>  <span class="sc">~</span> <span class="st">&quot;Other office&quot;</span>,</span>
@@ -419,7 +427,7 @@ $(document).ready(function () {
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  Category <span class="sc">==</span> <span class="st">&quot;B&quot;</span>  <span class="sc">~</span> <span class="st">&quot;Other scandals&quot;</span>,</span>
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  Category <span class="sc">==</span> <span class="st">&quot;F&quot;</span>  <span class="sc">~</span> <span class="st">&quot;Other&quot;</span>,</span>
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    ))</span></code></pre></div>
-<p>#Make “Congress” variable numeric by removing “th”, “st”, “rd” and “nd”.</p>
+<p>Make “Congress” variable numeric by removing “th”, “st”, “rd” and “nd”.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>Stack<span class="sc">$</span>Congress <span class="ot">&lt;-</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gsub</span>(<span class="st">&quot;th&quot;</span>,<span class="st">&quot;&quot;</span>,<span class="fu">as.character</span>(Stack<span class="sc">$</span>Congress)) </span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -431,9 +439,12 @@ $(document).ready(function () {
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>Stack<span class="sc">$</span>Congress <span class="ot">&lt;-</span></span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gsub</span>(<span class="st">&quot;st&quot;</span>,<span class="st">&quot;&quot;</span>,<span class="fu">as.character</span>(Stack<span class="sc">$</span>Congress))</span></code></pre></div>
-<p>#Reorder legend labels. This will make sure the colors match on the final product. However, the oonly issue I have is that ggplot is plotting the data in the reverse order. If you look closely, you can see the stack bars are in the right order, but just flipped.</p>
+<p></br></p>
+</div>
+<div id="reorder-legend-labels.-this-will-make-sure-the-colors-match-on-the-final-product.-however-the-oonly-issue-i-have-is-that-ggplot-is-plotting-the-data-in-the-reverse-order.-if-you-look-closely-you-can-see-the-stack-bars-are-in-the-right-order-but-just-flipped." class="section level3">
+<h3>Reorder legend labels. This will make sure the colors match on the final product. However, the oonly issue I have is that ggplot is plotting the data in the reverse order. If you look closely, you can see the stack bars are in the right order, but just flipped.</h3>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>Stack<span class="sc">$</span>Category <span class="ot">&lt;-</span> <span class="fu">factor</span>(Stack<span class="sc">$</span>Category, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Other office&quot;</span>, <span class="st">&quot;Election overturned&quot;</span>, <span class="st">&quot;Private sector&quot;</span>, <span class="st">&quot;Health/Family&quot;</span>, <span class="st">&quot;Left early&quot;</span>, <span class="st">&quot;Military service&quot;</span>, <span class="st">&quot;Unwanted sexual conduct&quot;</span>, <span class="st">&quot;Consentual sex scandals&quot;</span>, <span class="st">&quot;Other scandals&quot;</span>, <span class="st">&quot;Other&quot;</span>))</span></code></pre></div>
-<p>#Plot graph</p>
+<p>Plot graph</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>Congress_resignation_Plot <span class="ot">&lt;-</span> Stack <span class="sc">%&gt;%</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Congress =</span> <span class="fu">as.numeric</span>(Congress)) <span class="sc">%&gt;%</span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Congress, <span class="at">y =</span> value, <span class="at">fill =</span> Category)) <span class="sc">+</span></span>
@@ -441,11 +452,19 @@ $(document).ready(function () {
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> .<span class="dv">5</span>), <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> .<span class="dv">5</span>, <span class="at">size =</span> <span class="dv">8</span>)) <span class="sc">+</span> <span class="co">#center plot title</span></span>
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">&quot;Congress&quot;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&quot;resignations&quot;</span>) <span class="sc">+</span></span>
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">title =</span> <span class="cn">NULL</span>)) <span class="co">#gets rid of legend title</span></span></code></pre></div>
-<p>#View plot</p>
+<p>View plot</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(Congress_resignation_Plot)</span></code></pre></div>
-<p><img src="visualization_files/figure-html/unnamed-chunk-10-1.png" width="672" /> #Right now, the figure ia a mess. The main objective in editing this image it to space out all the text and get the colors to match the legend symbols from the original plot. Additionally, with will alter the font type.</p>
-<p>##Editing the Image.</p>
-<p>#Changing the legend aesthetics.</p>
+<p><img src="visualization_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p></br></p>
+</div>
+<div id="right-now-the-figure-ia-a-mess.-the-main-objective-in-editing-this-image-it-to-space-out-all-the-text-and-get-the-colors-to-match-the-legend-symbols-from-the-original-plot.-additionally-with-will-alter-the-font-type." class="section level3">
+<h3>Right now, the figure ia a mess. The main objective in editing this image it to space out all the text and get the colors to match the legend symbols from the original plot. Additionally, with will alter the font type.</h3>
+<p></br></p>
+</div>
+<div id="editing-the-image." class="section level3">
+<h3>Editing the Image.</h3>
+<p></br></p>
+<p>Changing the legend aesthetics.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>Congress_resignation_Plot <span class="ot">&lt;-</span> Congress_resignation_Plot <span class="sc">+</span> </span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fu">unit</span>(<span class="dv">6</span>, <span class="st">&#39;pt&#39;</span>)),</span>
@@ -454,20 +473,21 @@ $(document).ready(function () {
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(Congress_resignation_Plot)</span></code></pre></div>
-<p><img src="visualization_files/figure-html/unnamed-chunk-11-1.png" width="672" /> #Changing the Legend Colors.</p>
+<p><img src="visualization_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>Changing the Legend Colors.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>Congress_resignation_Plot <span class="ot">&lt;-</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  Congress_resignation_Plot <span class="sc">+</span> <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> Five_Thirty_Eight)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(Congress_resignation_Plot)</span></code></pre></div>
 <p><img src="visualization_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
-<p>#Adding more tick marks to the x-axis.</p>
+<p>Adding more tick marks to the x-axis.</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>Congress_resignation_Plot <span class="ot">&lt;-</span> Congress_resignation_Plot <span class="sc">+</span> <span class="fu">scale_x_continuous</span>(</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">60</span>, <span class="dv">65</span>, <span class="dv">70</span>, <span class="dv">75</span>, <span class="dv">80</span>, <span class="dv">85</span>, <span class="dv">90</span>, <span class="dv">95</span>, <span class="dv">100</span>, <span class="dv">105</span>, <span class="dv">110</span>, <span class="dv">115</span>)</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(Congress_resignation_Plot)</span></code></pre></div>
 <p><img src="visualization_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
-<p>#Changing y-axis asthetics.</p>
+<p>Changing y-axis asthetics.</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>Congress_resignation_Plot <span class="ot">&lt;-</span> Congress_resignation_Plot <span class="sc">+</span> </span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">r =</span> <span class="dv">0</span>), <span class="at">size =</span> <span class="fu">unit</span>(<span class="dv">6</span>, <span class="st">&#39;pt&#39;</span>))) <span class="sc">+</span> </span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>)) <span class="sc">+</span> </span>
@@ -475,7 +495,7 @@ $(document).ready(function () {
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(Congress_resignation_Plot)</span></code></pre></div>
 <p><img src="visualization_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
-<p>#Change font type for the axes</p>
+<p>Change font type for the axes</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>Congress_resignation_Plot <span class="ot">&lt;-</span> Congress_resignation_Plot <span class="sc">+</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;mono&quot;</span>),</span>
@@ -484,7 +504,11 @@ $(document).ready(function () {
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(Congress_resignation_Plot)</span></code></pre></div>
-<p><img src="visualization_files/figure-html/unnamed-chunk-15-1.png" width="672" /> #Annotate the graph to show signicicant temporal factors that caused resignations. This last change will produce the <em>Final Product</em>.</p>
+<p><img src="visualization_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p></br></p>
+</div>
+<div id="annotate-the-graph-to-show-significant-temporal-factors-that-caused-resignations.-this-last-change-will-produce-the-final-product." class="section level3">
+<h3>Annotate the graph to show significant temporal factors that caused resignations. This last change will produce the <em>Final Product</em>.</h3>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">=</span> <span class="fu">as.data.frame</span>(<span class="at">label =</span> <span class="fu">c</span>(<span class="st">&quot;WWII&quot;</span>, <span class="st">&quot;Changes to Pension Law&quot;</span>, <span class="st">&quot;Abscam Scandal&quot;</span>, <span class="st">&quot;Abrahamoff Scandal&quot;</span>, <span class="st">&quot;MeToo&quot;</span>), <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">76</span>, <span class="dv">89</span>, <span class="dv">97</span>, <span class="dv">109</span>, <span class="dv">115</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">25</span>, <span class="dv">18</span>, <span class="dv">18</span>, <span class="dv">20</span>))</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>Congress_resignation_Plot <span class="ot">&lt;-</span></span>
@@ -493,11 +517,15 @@ $(document).ready(function () {
 <span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(Congress_resignation_Plot)</span></code></pre></div>
 <p><img src="visualization_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
-<p>#Besides the inverted color scheme, the only blaring difference is that I cannot figure out how to add arrows from my labels to the bars themselves. The main issue is that I don’t know how to insert images within an image. Feel free to contact me if you how to make that work!</p>
-<p>#Save Image</p>
+<p></br></p>
+</div>
+<div id="besides-the-inverted-color-scheme-the-only-blaring-difference-is-that-i-cannot-figure-out-how-to-add-arrows-from-my-labels-to-the-bars-themselves.-the-main-issue-is-that-i-dont-know-how-to-insert-images-within-an-image.-feel-free-to-contact-me-if-you-how-to-make-that-work" class="section level3">
+<h3>Besides the inverted color scheme, the only blaring difference is that I cannot figure out how to add arrows from my labels to the bars themselves. The main issue is that I don’t know how to insert images within an image. Feel free to contact me if you how to make that work!</h3>
+<p>Save Image</p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>figure_file <span class="ot">=</span> <span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;Module5_data&quot;</span>,<span class="st">&quot;congress-resignations&quot;</span>,<span class="st">&quot;Congressional_Resignations.png&quot;</span>)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> figure_file, <span class="at">plot =</span> Congress_resignation_Plot)</span></code></pre></div>
 <pre><code>## Saving 7 x 5 in image</code></pre>
+</div>
 
 
 
