@@ -1,13 +1,14 @@
 ---
 title: "Visualization"
-output: 
+output:
+  word_document:
+    toc: no
   html_document:
-    toc: FALSE
+    toc: no
 ---
 #Welcome to my visualization exercise! Below is my attepmt at recreating a plot from FiveThirtyEight. My starting data was only their .csv file that they iused for the plot on their site describing Congressional resignations over time. The firgure itself was made using RStudio packages.... and some sweat and tears. See below for the original figure.
 
-<img src="rakich-resignations-11" style="float:left;padding-right:10px;">
-
+[FiveThirtyEight](https://fivethirtyeight.com/wp-content/uploads/2018/01/rakich-resignations-11.png?w=2048)
 
 
 
