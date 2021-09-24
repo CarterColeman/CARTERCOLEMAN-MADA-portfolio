@@ -170,6 +170,6 @@ print(Congress_resignation_Plot)
 figure_file = here("data","Module5_data","congress-resignations","Congressional_Resignations.png")
 ggsave(filename = figure_file, plot = Congress_resignation_Plot)
 ```
-Besides the inverted color scheme, the only blaring difference is that I cannot figure out how to add arrows from my labels to the bars themselves. The main issue is that I don't know how to insert images within an image. Feel free to contact me if you how to make that work!
+#Besides the inverted color scheme, the only blaring difference is that I cannot figure out how to add arrows from my labels to the bars themselves. The main issue is that I don't know how to insert images within an image. Feel free to contact me if you how to make that work!
 
 
