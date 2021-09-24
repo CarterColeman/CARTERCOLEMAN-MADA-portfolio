@@ -4,7 +4,14 @@ output:
   html_document:
     toc: FALSE
 ---
+#Welcome to my visualization exercise! Below is my attepmt at recreating a plot from FiveThirtyEight. My starting data was only their .csv file that they iused for the plot on their site describing Congressional resignations over time. The firgure itself was made using RStudio packages.... and some sweat and tears. See below for the original figure.
 
+<img src="rakich-resignations-11" style="float:left;padding-right:10px;">
+
+
+
+
+#Here is where I start my figure production.
 
 #Load important packages:
 ```{r}
@@ -12,8 +19,10 @@ library(tidyverse)
 library(readxl)
 library(dplyr)
 library(here)
+library(knitr)
 ```
-#Set up a custom color pallete for later use.\
+
+#Set up a custom color pallete for later use.
 ```{r}
 Five_Thirty_Eight <- c("Other office" = "#F5B901", "Election overturned" = "#222222", "Private sector" = "#018FD5", "Health/Family" = "#43AB43", "Left early" = "#AE66AB", "Military service" = "#A4522E", "Unwanted sexual conduct" = "#FF2700", "Consentual sex scandals" = "#FF9F02", "Other scandals" = "#FFE3D7", "Other" = "#CDCDCD")
 ```
