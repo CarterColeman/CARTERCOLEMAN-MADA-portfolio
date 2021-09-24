@@ -151,7 +151,7 @@ Congress_resignation_Plot <- Congress_resignation_Plot +
 
 print(Congress_resignation_Plot)
 ```
-#Annotate the graph to show signicicant temporal factors that caused resignations.
+#Annotate the graph to show signicicant temporal factors that caused resignations. This last change will produce the *Final Product*.
 ```{r}
 labels = as.data.frame(label = c("WWII", "Changes to Pension Law", "Abscam Scandal", "Abrahamoff Scandal", "MeToo"), x = c(76, 89, 97, 109, 115), y = c(25, 25, 18, 18, 20))
 
@@ -162,7 +162,7 @@ Congress_resignation_Plot <-
 print(Congress_resignation_Plot)
 ```
 
-#View Final Product
+#Besides the inverted color scheme, the only blaring difference is that I cannot figure out how to add arrows from my labels to the bars themselves. The main issue is that I don't know how to insert images within an image. Feel free to contact me if you how to make that work!
 
 
 #Save Image
