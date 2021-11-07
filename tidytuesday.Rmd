@@ -74,7 +74,7 @@ clean_df %>%
   select(everything()) %>%  
   summarise_all(funs(sum(is.na(.))))
 ```
-### The only NAs found are on the program description and program category variables. While they seem like large numbers, that is only about 0.4% and 1% of observations in each column. Therefore, i think its fine to keep them. 
+### The only NAs found are on the program description and program category variables. While they seem like large numbers, that is only about 0.4% and 1% of observations in each column. Therefore, I think its fine to keep them. 
 
 </br>
 
@@ -89,7 +89,7 @@ print(catalouge_plot)
 
 </br>
 
-### Interesting. Firt, it looks like there is somewhat of an exponential trend in number of papers written per year over time. Maybe it is a function of staff size? However, it looks like most papers are listed under the general catalogue group. This isn't an interesting result, so we will likely not explore the catalogue group variable.
+### Interesting. First, it looks like there is somewhat of an exponential trend in number of papers written per year over time. Maybe it is a function of staff size? However, it looks like most papers are listed under the general catalogue group. This isn't an interesting result, so we will likely not explore the catalogue group variable.
 
 </br>
 
