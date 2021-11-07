@@ -1,5 +1,5 @@
 # This Site serves as an open-source repository for all the data I worked with through my graduate program.
 
-# Below is the link to the Github repository for this site containing all of the code for analyses displayed.
+# Below is the link to my website containing final products for the data analysis projects ompleted throughout my graduate education.
 
-https://github.com/CarterColeman/CARTERCOLEMAN-MADA-portfolio
+https://cartercoleman.github.io/CARTERCOLEMAN-MADA-portfolio/index.html
