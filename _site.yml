@@ -21,8 +21,8 @@ navbar:
           href: ./tidytuesday.html
         - text: "Tidy Tuesday 2 Exercise"
           href: ./tidytuesday_exercise2.html
-        - text: "analysis3_part2"
-          href: ./analysis3_part2.html
+        - text: "MADA Analysis 3"
+          href: ./analysis3_part2_portfolio.html
   right:
     - icon: fa-github fa-lg
       href: https://github.com/CarterColeman/CARTERCOLEMAN-MADA-portfolio        

@@ -8,12 +8,17 @@ output:
 
 ```
 
-# Hello! {.tabset}
+# Hello!
+
+</br>
 
 ## Welcome to **my website** and _data analysis portfolio._
 
+</br>
+
 ### This Site is here to share data throughout my graduate degree in Environmental Health Science.
 
+</br>
 
 * Please use the `Menu Bar` above to look around.
 * Have fun!
