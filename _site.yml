@@ -21,6 +21,8 @@ navbar:
           href: ./tidytuesday.html
         - text: "Tidy Tuesday 2 Exercise"
           href: ./tidytuesday_exercise2.html
+          - text: "Viral Symptom Analysis Exercise"
+          href: ./analysis3_portfolio/analysis3_part2_portfolio.html
   right:
     - icon: fa-github fa-lg
       href: https://github.com/CarterColeman/CARTERCOLEMAN-MADA-portfolio        
