@@ -4,8 +4,6 @@ author: "C. Coleman"
 date: "10/19/2021"
 output: html_document
 ---
-_The following is a example exercise showing correlation and linear LASSO modeling of many different viral symptoms to body temperature. Data was provided from Brian McKay's Github repository. The code for this exercise from my Modern Applied Data Analysis class is located here: https://github.com/CarterColeman/CARTERCOLEMAN-MADA-analysis3_
-
 
 # Fit model analysis!
 
