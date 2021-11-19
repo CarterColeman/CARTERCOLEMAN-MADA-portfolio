@@ -18,6 +18,7 @@ library(readr)
 library(here)
 ```
 
+
 #### Load the TidyTuesday Data
 ```{r}
 papers <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-28/papers.csv')
@@ -79,7 +80,6 @@ clean_df %>%
 </br>
 
 ### Arbitrarily, I just wank to pick two variables to look at to see if anything interesting is going on. Let's maybe do catalogue group over time? More specifically, let's look at count contribution of papers to each catalouge group as a function of time in years.
-
 ```{r}
 catalouge_plot <- clean_df %>%
   ggplot(aes(x=year, fill=catalogue_group)) + geom_bar()

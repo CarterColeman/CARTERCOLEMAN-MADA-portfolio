@@ -1,0 +1,872 @@
+---
+title: "Tidy Tuesday Exercise 2"
+output: 
+  html_document:
+    toc: FALSE
+---
+
+# Welcome to my Second TidyTuesday Exercise 2. This week focuses on a full analysis of Marble Racing data.
+
+</br>
+
+_Load needed packages._
+```{r, message=FALSE}
+library(tidyverse) #Working with multiple Tidy packages
+library(tidymodels) #Building models
+library(dplyr) #data manipulation
+library(here) #setting pathways for saving files
+library(rpart) #Model fitting
+library(ranger) #Model fitting
+library(glmnet) #Model fitting
+library(purrr) #Ensamble Modeling
+library(stacks)
+```
+
+</br>
+
+_Load in the data from the TidyTuesday github._
+```{r}
+marbles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-02/marbles.csv')
+```
+
+</br>
+
+## Initial Data Wrangling and Exploration
+
+</br>
+
+_Next, I want to see whats going on in the raw data frame. We will get variable classes and summary stats using the summary() function and use the glimpse() function to get a sense of numbe of rows/variables. The main goal is to see what might be useful, interesting, and studiable from thr marble racing data set._
+```{r}
+summary(marbles)
+
+glimpse(marbles)
+```
+
+</br>
+
+_Based on the summary of glimpse of the "marbles" df, it looks like there are 256 rows (excellent, large n) and 14 variables. By viewing the df, I am also seeing that there are a number of variables we don't need and we can get rid of immediately ("source" and "notes"). On that same thought process, I want variables that will potentially tell me something about what variables influence whether a marble wins. Therefore, I will want to use average marble lap speed as my outcome variable. I will arbitrarily select variables as predictors and start exploring relationships below._
+```{r}
+#using select() to remove variables into a clean_df
+clean_df <- marbles %>%
+  select(-"date", -"race", -"source", -"time_s", -"pole", -"points", -"notes", -"host")
+
+#use glimpse() function to look out the clean_df summary meta data
+glimpse(clean_df)
+
+#checking for NA variables
+is.na.data.frame(clean_df)
+```
+
+</br>
+
+_There are now 6 variables, with a single NA in the clean_df. For ease we are just going to remove the row with the NA. Afterwards, we can start partition the clean_df and exploring relationships._
+```{r}
+#remove row with NA
+clean_df <- na.omit(clean_df)
+
+is.na.data.frame(clean_df)
+```
+
+</br>
+
+_For ease, I am going to make a new df for each of the categorical variables being used. That way we can group by each variable later on to assess thinks like which team, marble, course has the fastest times._
+```{r}
+#Site
+site_df <- clean_df %>%
+  select(-"marble_name", -"team_name", -"number_laps", -"track_length_m")
+
+#Consolidate duplicates and average mean lap time per site.
+site_df <- site_df %>%                                    
+  group_by(site) %>%
+  dplyr::summarise(avg_time_lap = mean(avg_time_lap)) %>% 
+  as.data.frame()
+
+#Marble Name
+marble_name_df <- clean_df %>%
+  select(-"site", -"team_name", -"number_laps", -"track_length_m")
+
+#Consolidate duplicates and average mean lap time per marble.
+marble_name_df <- marble_name_df %>%
+  group_by(marble_name) %>%
+  dplyr::summarise(avg_time_lap = mean(avg_time_lap)) %>% 
+  as.data.frame()
+
+#Team Name
+team_name_df <- clean_df %>%
+  select(-"marble_name", -"site", -"number_laps", -"track_length_m")
+
+#Consolidate duplicates and average mean lap time per team.
+team_name_df <- team_name_df %>%
+  group_by(team_name) %>%
+  dplyr::summarise(avg_time_lap = mean(avg_time_lap)) %>% 
+  as.data.frame()
+```
+
+</br>
+
+_Plotting avg_time_lap by Site to see if the course makes marbles particularly faster_
+```{r, fig.width=10}
+site_plot <- site_df %>%
+  ggplot(aes(x=site, y=avg_time_lap, fill=site)) +
+  geom_bar(stat = "identity") +
+  xlab("Site") +
+  ylab("Average Lap Time (s)") +
+  ggtitle("Site vs. Average Lap Time")
+
+plot(site_plot)
+```
+_Maybe Greenstone, O'raceway, Razzway, and Savage Speedway do better on average? Remember, average lap time is measure in seconds, so with the range being 20s, that is a pretty big difference._
+
+</br>
+
+_Plotting avg_time_lap by marble name to see if the owner/marble itself makes a difference_
+```{r, fig.width=8}
+marble_name_plot <- marble_name_df %>%
+  ggplot(aes(x=marble_name, y=avg_time_lap, fill=marble_name)) +
+  geom_bar(stat = "identity") +
+  xlab("Marble Name") +
+  ylab("Average Lap Time (s)") +
+  theme(axis.text=element_text(size=10)) +
+  ggtitle("Marble Name vs. Average Lap Time") +
+  theme(axis.text.x = element_text(angle = 90))
+
+plot(marble_name_plot)
+```
+_Also seems like some marbles tend to perform better._
+
+</br>
+
+_Plotting avg_time_lap by team name to see if certain teams were just more successful than others_
+```{r, fig.width=10}
+team_name_plot <- team_name_df %>%
+  ggplot(aes(x=team_name, y=avg_time_lap, fill=team_name)) +
+  geom_bar(stat = "identity") +
+  xlab("Team") +
+  ylab("Average Lap Time (s)") +
+  theme(axis.text=element_text(size=10)) +
+  ggtitle("Team vs. Average Lap Time") +
+  theme(axis.text.x = element_text(angle = 90))
+
+plot(team_name_plot)
+```
+
+_Interesting! Does not seem like one team performs better than another._
+
+</br>
+
+_Plotting avg_time_lap by track length and number of laps to see if the physical layout of a track enhanced marble performance._
+
+```{r, fig.width=10}
+#Track Length Plot
+track_length_plot <- clean_df %>%
+  ggplot(aes(x=track_length_m, y=avg_time_lap)) +
+  geom_point() +
+  geom_smooth(method = "lm", se=TRUE, fill="orange", color="red")+
+  xlab("track length") +
+  ylab("Average Lap Time (s)") +
+  theme(axis.text=element_text(size=10)) +
+  ggtitle("Track length vs. Average Lap Time")
+
+plot(track_length_plot)
+
+#Number of Laps Plot
+laps_plot <- clean_df %>%
+  ggplot(aes(x=number_laps, y=avg_time_lap)) +
+  geom_point() +
+  geom_smooth(method = "lm", se=TRUE, fill="orange", color="red")+
+  xlab("Number of Laps in Race") +
+  ylab("Average Lap Time (s)") +
+  theme(axis.text=element_text(size=10)) +
+  ggtitle("Number of Laps vs. Average Lap Time")
+
+plot(laps_plot)
+```
+
+_As one would expect, the longer the track length, the larger average race time. However, number of laps does not seem to have a relationship between average lap time._
+
+</br>
+
+## Hypothesis and Outcome of Interest
+_Based on the exploration above, I would like to use average lap time as the outcome variable in an effort to assess how different track and marble characteristics predict marble race performance. To the effect, I hypothesize that the best predictors of average marble lap time race performance will be track ID and number of laps. This is because some tracks may be graded and constructed differently, allowing for differential performance between just the tracks. Additionally, I hypothesize that because the main propelling force is gravity, and the acceleration of gravity is constant, the more laps are included in the average lap time measurement, the slower a marble's average lap speed will be. This is because to only other forces applied to the marble other than gravity actually act to slow the marble down, which will integrate by distance traveled._
+
+</br>
+
+## Train/Test Splitting and Additional Data Cleaning
+
+### Train/Test Splitting:
+
+_Split clean2_df into a training data set and a test data set by a proportion of 75% train to 25% test . The training data is used to fit a model and the test data is to assess how good of a fit the data is._
+```{r}
+# Split 3/4 of the data into training data 
+data_split <- initial_split(clean_df, prop = 3/4)
+
+# Make new data frames for training and test data
+train_data <- training(data_split)
+test_data  <- testing(data_split)
+```
+
+
+</br>
+
+## Machine Learning Models
+
+_First, set a seed: This sets a random number generator with initial (pseudo)random values set as "123". We will need a series of random numbers created for our machine learning analysis._
+```{r}
+set.seed(123)
+```
+
+</br>
+
+### Train Data: Average Lap Time Null Model
+
+_5-fold cross validation, 5 times repeated for train data: Here we are setting a cross-validation to measure how the results of our machine learning models will generalize to an independent data set. As such, the folds created will be be 5 random sub-samples of the train data set to test the validity of our models within the train data set. The 5x5 structure is arbitrary._
+```{r}
+fold <- vfold_cv(train_data, v = 5, repeats = 5, strata = avg_time_lap)
+```
+
+_Creating the recipe for Average Lap Time vs all predictors_
+
+```{r}
+ATL.recipe <- 
+  recipe(avg_time_lap ~ ., data = train_data) %>%
+  step_dummy(all_nominal(), -all_outcomes()) %>%
+  step_zv(all_predictors()) %>%
+  step_normalize(all_predictors())
+
+ATL.recipe
+```
+_Setting linear regression model to assess relationship between average lap time and all other predictor variables._
+```{r}
+lm_mod <- linear_reg() %>% set_engine("lm") %>% set_mode("regression")
+```
+
+_However, first we need to create our null model to test against._
+
+</br>
+
+### Null Model:
+
+ </br>
+
+_Creates null model recipe. When we call this term, it will indicate in our workflow that average lap time will be predicted by a value of 1 (NULL)._ 
+```{r}
+Null_recipe_lm_train <- recipe(avg_time_lap ~ 1, data = train_data)
+```
+
+_Creating the Workflow: this creates a set workflow for running a null linear regression model with Average Lap Time as the outcome._
+```{r}
+null_wf <- workflow() %>% add_model(lm_mod) %>% add_recipe(Null_recipe_lm_train)
+```
+
+_Here, I am going to fit the null model created in the above workflow to the folds made from the train data set._
+```{r}
+null_train_lm <- fit_resamples(null_wf, resamples = fold)
+```
+_Calculate RMSE for the train data linear model._
+```{r}
+Null_Train_Met <- collect_metrics(null_train_lm)
+
+Null_Train_Met
+```
+_RMSE = 5.48, with a standard deviation of 0.062. This will serve as our check to test our models against latter on.
+
+
+</br>
+
+### Model Tuning and Fitting
+
+_a) Fit a Tree Model_
+_b) Fit a LASSO Model_
+_c) Fit a Random Forest Model_
+_d) Fit a _
+
+</br>
+
+#### a) Tree Model
+
+</br>
+
+_Specifying The Model: Decision Tree_
+```{r}
+#Identifying hyperparameters we want to use.
+tune_spec_dtree <- 
+  decision_tree(
+    cost_complexity = tune(),
+    tree_depth = tune()
+  ) %>% 
+  set_engine("rpart") %>% 
+  set_mode("regression")
+
+tune_spec_dtree
+```
+</br>
+
+_Tune Grid Specification: Decision Tree_
+```{r}
+#create a regular grid of values for using convenience functions for each hyperparameter.
+tree_grid_dtree <-
+  dials::grid_regular(
+    cost_complexity(), 
+    tree_depth(), 
+    levels = 5)
+
+tree_grid_dtree
+```
+
+</br>
+
+_Creating a Workflow: Decision Tree_
+```{r}
+dtree_wf <- workflow() %>%
+  add_model(tune_spec_dtree) %>%
+  add_recipe(ATL.recipe)
+```
+
+</br>
+
+_Cross Validation with tunegrid(): Decision Tree_
+```{r}
+dtree_resample <- 
+  dtree_wf %>% 
+  tune_grid(
+    resamples = fold,
+    grid = tree_grid_dtree
+    )
+
+dtree_resample %>%
+  collect_metrics()
+```
+
+</br>
+
+_Plot model performance using autoplot()_
+```{r}
+dtree_resample %>%
+  autoplot()
+```
+</br>
+
+_Showing and selecting best performing Models_
+```{r}
+#Showing best performing tree models
+dtree_resample %>%
+  show_best(n=1)
+  
+#Selects best performing model
+best_tree <- dtree_resample %>%
+  select_best()
+```
+
+_This shows a tree with depth = 7 is the best performing models (RMSE = 1.33; STE = 0.040). This model performs much better than the null model._
+
+</br>
+
+_Creating final fit based on best model permutation and plotting predicted values from that final fit model_
+```{r}
+dtree_final_wf <- 
+  dtree_wf %>% 
+  finalize_workflow(best_tree)
+
+dtree_final_wf
+
+#Create workflow for fitting model to train_data2 predictions
+dtree_final_fit <- 
+  dtree_final_wf %>%
+  fit(train_data) 
+```
+
+#### Calculating residuals and ploting Actual vs. Predicted values
+
+</br>
+
+_Calculating residuals manually._
+```{r}
+dtree_residuals <- dtree_final_fit %>%
+  augment(train_data) %>% #use augment() to make predictions from train data
+  select(c(.pred, avg_time_lap)) %>%
+  mutate(.resid = avg_time_lap - .pred) #calculate residuals and make new row.
+
+dtree_residuals
+```
+_model predictions from tuned model vs actual outcomes_
+```{r}
+dtree_pred_plot <- ggplot(dtree_residuals, 
+                          aes(x = avg_time_lap, 
+                              y = .pred)) + 
+  geom_point() + 
+  labs(title = "Predictions vs Actual: Decision Tree", 
+       x = "Actual Average Time Lap", 
+       y = "Average Time Lap Prediction")
+dtree_pred_plot
+```
+_plot residuals vs predictions_
+```{r}
+dtree_residual_plot <- ggplot(dtree_residuals, 
+                              aes(y = .resid, 
+                                  x = .pred)) + 
+  geom_point() + 
+  labs(title = "Predictions vs Residuals: Decision Tree", 
+       x = "Average Time Lap Prediction", 
+       y = "Residuals")
+plot(dtree_residual_plot) #view plot
+```
+
+</br>
+
+### b) LASSO Model
+
+</br>
+
+_Specifying The Model: LASSO_
+```{r}
+lasso_mod <- 
+  linear_reg(penalty = tune(), mixture = 1) %>% 
+  set_engine("glmnet")
+```
+
+</br>
+
+_Creating a Workflow: LASSO_
+```{r}
+lasso_wf <- workflow() %>%
+  add_model(lasso_mod) %>%
+  add_recipe(ATL.recipe)
+```
+
+</br>
+
+_Create Tuning Grid: LASSO_
+```{r}
+lasso_grid <- tibble(penalty = 10^seq(-3, 0, length.out = 30))
+```
+
+</br>
+
+_Cross Validation with tune_grid(): LASSO_
+```{r}
+lasso_resample <- 
+  lasso_wf %>%
+  tune_grid(resamples = fold,
+            grid = lasso_grid,
+            control = control_grid(verbose = FALSE, save_pred = TRUE),
+            metrics = metric_set(rmse))
+
+lasso_resample %>%
+  collect_metrics()
+```
+
+</br>
+
+_Plot model performance using autoplot()_
+```{r}
+#Plot of actual train_data
+lasso_resample %>%
+  autoplot()
+```
+
+_Showing and selecting best performing Models_
+```{r}
+#Showing best performing tree models
+lasso_resample %>%
+  show_best()
+  
+#Selects best performing model
+best_lasso <- lasso_resample %>%
+  select_best()
+```
+
+_This shows that model 18 is the best performing models (RMSE = 1.10; STE = 0.025). It performs better than the null model, indicating that it fits the data with some sort of relationship._
+
+_Creating final fit based on best model permutation and plotting predicted values from that final fit model_
+```{r}
+lasso_final_wf <- 
+  lasso_wf %>% 
+  finalize_workflow(best_lasso)
+
+lasso_final_wf
+
+#Create workflow for fitting model to train_data2 predictions
+lasso_final_fit <- 
+  lasso_final_wf %>%
+  fit(train_data) 
+```
+
+_Calculating residuals manually._
+```{r}
+lasso_residuals <- lasso_final_fit %>%
+  augment(train_data) %>% #use augment() to make predictions from train data
+  select(c(.pred, avg_time_lap)) %>%
+  mutate(.resid = avg_time_lap - .pred) #calculate residuals and make new row.
+
+lasso_residuals
+```
+_model predictions from tuned model vs actual outcomes_
+```{r}
+lasso_pred_plot <- ggplot(lasso_residuals, 
+                          aes(x = avg_time_lap, 
+                              y = .pred)) + 
+  geom_point() + 
+  labs(title = "Predictions vs Actual: LASSO", 
+       x = "Average Lap Time", 
+       y = "Average Lap Time Prediction")
+lasso_pred_plot
+```
+_plot residuals vs predictions_
+```{r}
+lasso_residual_plot <- ggplot(lasso_residuals, 
+                              aes(y = .resid, 
+                                  x = .pred)) + 
+  geom_point() + 
+  labs(title = "Predictions vs Residuals: LASSO", 
+       x = "Average Lap Time Prediction", 
+       y = "Residuals")
+plot(lasso_residual_plot) #view plot
+```
+
+</br>
+
+### c) Random Forest
+
+</br>
+
+_Create function to detect cores for Random Forest Model computation_
+```{r}
+cores <- parallel::detectCores()
+cores
+```
+_Specifying The Model: Random Forest_
+```{r}
+rf_mod <- 
+  rand_forest(mtry = tune(), min_n = tune(), trees = 1000) %>% 
+  set_engine("ranger", num.threads = cores) %>% 
+  set_mode("regression")
+```
+
+</br>
+
+_Creating a Workflow: Random Forest_
+```{r}
+rf_wf <- workflow() %>%
+  add_model(rf_mod) %>%
+  add_recipe(ATL.recipe)
+```
+
+</br>
+
+_Create Tuning Grid: Random Forest_
+```{r}
+rf_grid  <- expand.grid(mtry = c(3, 4, 5, 6), min_n = c(40,50,60), trees = c(500,1000)  )
+```
+
+</br>
+
+_Cross Validation with tune_grid(): Random Forest_
+```{r}
+rf_resample <- 
+  rf_wf %>% 
+  tune_grid(fold,
+            grid = 25,
+            control = control_grid(save_pred = TRUE),
+            metrics = metric_set(rmse))
+
+rf_resample %>%
+  collect_metrics()
+```
+
+</br>
+
+_Plot model performance using autoplot()_
+```{r}
+#Plot of actual train_data2
+rf_resample %>%
+  autoplot()
+```
+
+_Showing and selecting best performing Models_
+```{r}
+#Showing best performing tree models
+rf_resample %>%
+  show_best()
+  
+#Selects best performing model
+best_rf <- rf_resample %>%
+  select_best()
+```
+
+_This shows that "mtry 52" is the best performing model (RMSE = 0.94; STE = 0.032). This performs better than the null model, indicating the model fits the data well._
+
+_Creating final fit based on best model permutation and plotting predicted values from that final fit model_
+```{r}
+rf_final_wf <- 
+  rf_wf %>% 
+  finalize_workflow(best_rf)
+
+rf_final_wf
+
+#Create workflow for fitting model to train_data predictions
+rf_final_fit <- 
+  rf_final_wf %>%
+  fit(train_data) 
+```
+
+_Calculating residuals manually._
+```{r}
+rf_residuals <- rf_final_fit %>%
+  augment(train_data) %>% #use augment() to make predictions from train data
+  select(c(.pred, avg_time_lap)) %>%
+  mutate(.resid = avg_time_lap - .pred) #calculate residuals and make new row.
+
+rf_residuals
+```
+
+_model predictions from tuned model vs actual outcomes_
+```{r}
+rf_pred_plot <- ggplot(rf_residuals, 
+                          aes(x = avg_time_lap, 
+                              y = .pred)) + 
+  geom_point() + 
+  labs(title = "Predictions vs Actual: Random Forest", 
+       x = "Average Lap Time Actual", 
+       y = "Average Lap Time Prediction")
+rf_pred_plot
+```
+_plot residuals vs predictions_
+```{r}
+rf_residual_plot <- ggplot(rf_residuals, 
+                              aes(y = .resid, 
+                                  x = .pred)) + 
+  geom_point() + 
+  labs(title = "Predictions vs Residuals: Random Forest", 
+       x = "Average Lap Time Prediction", 
+       y = "Residuals")
+plot(rf_residual_plot) #view plot
+```
+
+</br>
+
+### d) Ensemble Model
+
+_Based on the models run above, I tend to like the LASSO model because of the penalty and removal associated with poorly predicting variables. However, the random forest model had the best RMSE value when compared to the null model for Average Lap Time. Therefore, I want to build an ensemble model with LASSO and Random Forest to see if the combination fits the data any better._
+
+_Note, that the ensemble model already has recipes, workflows, etc. for LASSO and Random Forest Models created above. All that needs to be done is combine them._
+
+</br>
+
+_edit resampling definition for both random forest and LASSO to include proper control arguments_
+```{r}
+#random forest
+rf_resample2 <- 
+  rf_wf %>% 
+  tune_grid(fold,
+            grid = 25,
+            control = control_stack_grid(),
+            metrics = metric_set(rmse))
+
+rf_resample2 %>%
+  collect_metrics()
+```
+
+</br>
+
+```{r}
+#LASSO
+lasso_resample2 <- 
+  lasso_wf %>%
+  tune_grid(resamples = fold,
+            grid = lasso_grid,
+            control = control_stack_grid(),
+            metrics = metric_set(rmse))
+
+lasso_resample2 %>%
+  collect_metrics()
+```
+
+
+_Stacking data with stack package_
+```{r}
+clean2_df_stack <- 
+  stacks() %>%
+  add_candidates(lasso_resample2) %>%
+  add_candidates(rf_resample2)
+
+clean2_df_stack
+```
+
+_Before fitting our stack to our data, it is usually good to use the blend_prediction() function to assess how the model output will be combined in the final prediction. This is done by fitting a LASSO model on the data stack, predicting the true assessment set outcome using the predictions from each of the candidate members._
+```{r}
+ensemble_mod <-
+  clean2_df_stack %>%
+  blend_predictions()
+
+autoplot(ensemble_mod)
+```
+
+_Fitting the stack for our LASSO/RF Ensemble model to our train data using the blended predication model._
+```{r}
+ensemble_mod <-
+  ensemble_mod %>%
+  fit_members()
+
+ensemble_mod
+
+#using collect_parameters function to see which individual model was used to assign which stacking coefficient.
+collect_parameters(ensemble_mod, "lasso_resample2")
+collect_parameters(ensemble_mod, "rf_resample2")
+```
+
+_This shows that rf_resamble2-1-03 is the best performing model (weight = 0.488), which is a random forest model. However, the summary reported that only 4 models total out of 52 total possibilities. This seems like a red flag to me, possibly indicating that I don't have enough data. Therefore, I will most likely not use it._
+
+## Model Evaluation
+_Based on the comparison of RMSE scores between the four models and the null model, analysis of fit made by each model, and prediction fitting, I would like to use the LASSO model on the test data. The Random Forest had the best over all RMSE, but the LASSO model most likely picked a combination of variables that best predicted the outcome by dropping variables with penalties </= 0. As stated above, the Ensemble model is ruled out because there is likely not enough data to make the Ensemble model perform well._
+
+</br>
+
+## Test Data Modeling
+
+</br>
+ 
+### LASSO Model
+
+</br>
+
+_Specifying The Model: LASSO_
+```{r}
+lasso_mod <- 
+  linear_reg(penalty = tune(), mixture = 1) %>% 
+  set_engine("glmnet")
+```
+
+_Creating new recipe for LASSO modeling of test data_
+```{r}
+ATL.recipe2 <- 
+  recipe(avg_time_lap ~ ., data = test_data) %>%
+  step_dummy(all_nominal(), -all_outcomes()) %>%
+  step_zv(all_predictors()) %>%
+  step_normalize(all_predictors())
+
+ATL.recipe2
+```
+
+</br>
+
+_Creating a Workflow: LASSO_
+```{r}
+lasso_wf2 <- workflow() %>%
+  add_model(lasso_mod) %>%
+  add_recipe(ATL.recipe2)
+```
+
+</br>
+
+_Create Tuning Grid: LASSO_
+```{r}
+lasso_grid <- tibble(penalty = 10^seq(-3, 0, length.out = 30))
+```
+
+</br>
+
+_Cross Validation with tune_grid(): LASSO_
+```{r}
+lasso_resample2 <- 
+  lasso_wf2 %>%
+  tune_grid(resamples = fold,
+            grid = lasso_grid,
+            control = control_grid(verbose = FALSE, save_pred = TRUE),
+            metrics = metric_set(rmse))
+
+lasso_resample2 %>%
+  collect_metrics()
+```
+
+</br>
+
+_Plot model performance using autoplot()_
+```{r}
+#Plot of actual train_data
+lasso_resample2 %>%
+  autoplot()
+```
+
+_Showing and selecting best performing Models_
+```{r}
+#Showing best performing tree models
+lasso_resample2 %>%
+  show_best()
+  
+#Selects best performing model
+best_lasso2 <- lasso_resample2 %>%
+  select_best()
+```
+
+_This shows that model 16 is the best performing models (RMSE = 1.035; STE = 0.024). It performs better than the null model, indicating that it fits the data with some sort of relationship._
+
+_Creating final fit based on best model permutation and plotting predicted values from that final fit model_
+```{r}
+lasso_final_wf2 <- 
+  lasso_wf2 %>% 
+  finalize_workflow(best_lasso2)
+
+lasso_final_wf2
+
+#Create workflow for fitting model to test_data predictions
+lasso_final_fit2 <- 
+  lasso_final_wf2 %>%
+  fit(test_data) 
+```
+
+_Calculating residuals manually._
+```{r}
+lasso_residuals2 <- lasso_final_fit2 %>%
+  augment(test_data) %>% #use augment() to make predictions from train data
+  select(c(.pred, avg_time_lap)) %>%
+  mutate(.resid = avg_time_lap - .pred) #calculate residuals and make new row.
+
+lasso_residuals2
+```
+
+_model predictions from tuned model vs actual outcomes_
+```{r}
+lasso_pred_plot2 <- ggplot(lasso_residuals2, 
+                          aes(x = avg_time_lap, 
+                              y = .pred)) + 
+  geom_point() + 
+  labs(title = "Predictions vs Actual: LASSO Test", 
+       x = "Average Lap Time", 
+       y = "Average Lap Time Prediction")
+lasso_pred_plot2
+```
+
+_plot residuals vs predictions_
+```{r}
+lasso_residual_plot2 <- ggplot(lasso_residuals2, 
+                              aes(y = .resid, 
+                                  x = .pred)) + 
+  geom_point() + 
+  labs(title = "Predictions vs Residuals: LASSO Test", 
+       x = "Average Lap Time Prediction", 
+       y = "Residuals")
+plot(lasso_residual_plot2) #view plot
+```
+
+
+</br>
+
+
+## Discussion
+
+_If you haven't already repressed it, think back to June 2020. The COVID-19 pandemic is in full swing, lockdown orders are still in place in areas where the virus is spreading at very high rates. You are terrified of interacting with people and one by one you favorite tv shows, movie franchises, and sports are disappearing. While some of us decided to throw our lot in to hiking and DIY crafts, it seems others found excitement in a new contactless sport: marble racing. In this tidy tuesday, I will be taking on the role of an aspiring pandemic ESPN analyst to cover the the Jelle's Marble Run competition. My goal will be to use the 2020 season's data to assess that makes a winning marble. This will ultimately be done through the use of Machine Learning models._
+
+_During this exercise, I loaded raw data for the Jelle's Marble Run 2020 season. BAsed on observations made in the loaded data, I cleaned the data down to essentially six variables of interest: site, marble name, team name, track length, number of laps, and average lap time. I chose average lap time as my outcome in an effort to try and see if we could predict marble performance based on the other five predictors._
+
+_Exploration of the data basically showed that there was some sort of trend between average lap time and all variables except the team that marble belongs to number of laps in race. Given this information, I included all variables into four machine learning models to see if we could make a complex model to predict marble performance._
+
+_Results of the four models are as follows:_
+
+_Tree Model shows a tree with depth = 7 is the best performing models (RMSE = 1.33; STE = 0.040). This model performs much better than the null model._
+_Lasso shows that model 18 is the best performing models (RMSE = 1.10; STE = 0.025). It performs better than the null model, indicating that it fits the data with some sort of relationship._
+_Random Forest shows that "mtry 52" is the best performing model (RMSE = 0.94; STE = 0.032). This performs better than the null model, indicating the model fits the data well._
+_Ensemble model shows that rf_resamble2-1-03 is the best performing model (weight = 0.488), which is a random forest model. However, the summary reported that only 4 models total out of 52 total possibilities. This seems like a red flag to me, possibly indicating that I don't have enough data. Therefore, I will most likely not use it._
+
+_At this point, I concluded that based on the comparison of RMSE scores between the four models and the null model, analysis of fit made by each model, and prediction fitting, I would like to use the LASSO model on the test data. The Random Forest had the best over all RMSE, but the LASSO model most likely picked a combination of variables that best predicted the outcome by dropping variables with penalties </= 0. As stated above, the Ensemble model is ruled out because there is likely not enough data to make the Ensemble model perform well._
+
+_Finally, I re-ran a LASSO model, this time with the test data. Results indicated that model 16 was the best performing model (RMSE = 1.035; STE = 0.024). It performs better than the null model, indicating that it fits the data with some sort of relationship. The RMSE and standard deviation for this LASSO model for test data is consistent with that of the train data, showing that predictions with good fit can be made and reproduced using the LASSO model._
