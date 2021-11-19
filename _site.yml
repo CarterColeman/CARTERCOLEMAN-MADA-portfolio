@@ -14,15 +14,15 @@ navbar:
     - text: "Projects"
       menu:
         - text: "R Coding"
-          href: ./rcoding.html
+          href: ./rcoding_files/rcoding.html
         - text: "Visualization"
-          href: ./visualization.html
+          href: ./visualization_files/visualization.html
         - text: "Tidy Tuesday"
-          href: ./tidytuesday.html
+          href: ./rcoding_files/tidytuesday.html
         - text: "Tidy Tuesday 2 Exercise"
-          href: ./tidytuesday_exercise2.html
+          href: ./rcoding_files/tidytuesday_exercise2.html
         - text: "MADA Analysis 3"
-          href: ./analysis3_part2_portfolio.html
+          href: ./rcoding_files/analysis3_part2_portfolio.html
   right:
     - icon: fa-github fa-lg
       href: https://github.com/CarterColeman/CARTERCOLEMAN-MADA-portfolio        
