@@ -10,7 +10,7 @@ navbar:
   title: "My Data Analysis Portfolio"
   left:
     - text: "About Me"
-      href: ./aboutme.html
+      href: ./Files/aboutme.html
     - text: "Projects"
       menu:
         - text: "R Coding"
